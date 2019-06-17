@@ -91,7 +91,7 @@ export default class App extends Component {
                 </CardTitle>
                 <Button
                   onClick={() => this.handelDelete(item.id)}
-                  color="danger"
+                  color="primary"
                 >
                   Delete
                 </Button>
