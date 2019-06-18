@@ -1,50 +1,55 @@
 import React, { Component } from "react";
 import { Button, Card, CardTitle } from "reactstrap";
+import { connect } from "react-redux";
+import { fetchOldItems, addItem } from "./actions/actions";
 
-export default class App extends Component {
+class App extends Component {
   constructor(props) {
     super(props);
     this.inputBox = React.createRef();
   }
-  state = {
-    items: []
-  };
 
   handelClick = () => {
     if (this.inputBox.current.value !== "") {
       const item = {
-        id: this.state.items.length,
+        id: this.props.items.length,
         name: this.inputBox.current.value,
         isDone: false
       };
-      if (this.state.items.length) {
-        this.setState({ items: [...this.state.items, item] });
-      } else this.setState({ items: [item] });
+      if (this.props.items.length) {
+        this.props.addItem([...this.props.items, item]);
+      } else this.props.addItem([item]);
     }
     this.inputBox.current.value = "";
   };
   calculateIsDone = () => {
     let count = 0;
-    this.state.items.forEach(item => (item.isDone === false ? count++ : count));
+    let dummy = this.props.items;
+    console.log(dummy);
+    if (dummy) {
+      dummy.forEach(item => (item.isDone === false ? count++ : count));
+    }
     return count;
   };
   handelDone = item => {
+    console.log(this.props.items);
     let bool = item.isDone ? false : true;
-    let items = [...this.state.items];
+    let items = [...this.props.items];
     let newItems = items.map(a =>
       a.id === item.id ? { id: item.id, name: item.name, isDone: bool } : a
     );
-    this.setState({ items: newItems });
+    this.props.addItem(newItems);
   };
   handelDelete = id => {
-    let items = [...this.state.items];
+    let items = [...this.props.items];
     const newList = items.filter(a => {
       if (a.id !== id) return a;
     });
-    this.setState({ items: newList });
+    this.props.addItem(newList);
   };
 
   render() {
+    let { items } = this.props.items;
     return (
       <>
         <div className="container form-group">
@@ -65,7 +70,7 @@ export default class App extends Component {
             </Button>
           </div>
           <div>
-            {this.calculateIsDone()} remaining out of {this.state.items.length}{" "}
+            {this.calculateIsDone()} remaining out of {this.props.items.length}{" "}
             tasks
           </div>
           <div
@@ -75,12 +80,12 @@ export default class App extends Component {
               justifyContent: "center"
             }}
           >
-            {this.state.items.map(item => (
+            {this.props.items.map(item => (
               <Card
                 className="col-3"
                 body
-                inverse
-                color={item.isDone ? "success" : "info"}
+                // inverse
+                color={item.isDone ? "success" : ""}
                 key={item.id}
               >
                 <CardTitle
@@ -91,7 +96,7 @@ export default class App extends Component {
                 </CardTitle>
                 <Button
                   onClick={() => this.handelDelete(item.id)}
-                  color="primary"
+                  color="danger"
                 >
                   Delete
                 </Button>
@@ -112,3 +117,12 @@ export default class App extends Component {
     );
   }
 }
+
+const mapStateToProps = state => ({
+  items: state.items.items
+});
+
+export default connect(
+  mapStateToProps,
+  { fetchOldItems, addItem }
+)(App);
